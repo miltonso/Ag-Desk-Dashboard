@@ -21,6 +21,6 @@ from django.urls import include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('farm_management.urls')),
+    path('api/', include('farm_management.urls')),  # Add 'api/' prefix here
     
 ]

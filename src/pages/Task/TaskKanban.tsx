@@ -21,6 +21,7 @@ import {
 } from '@mui/material';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import './taskkanban.css';
+import axios from 'axios';
 
 interface TaskDetails {
   type: string;
@@ -36,7 +37,8 @@ interface FormErrors {
   severity: string;
 }
 
-const initialKanbanData = {
+{
+  /*const initialKanbanData = {
   todo: {
     title: "To Do's",
     count: 3,
@@ -101,7 +103,8 @@ const initialKanbanData = {
       },
     ],
   },
-};
+}; */
+}
 
 const TaskKanban: React.FC = () => {
   const [formErrors, setFormErrors] = useState<FormErrors>({
@@ -109,47 +112,51 @@ const TaskKanban: React.FC = () => {
     title: '',
     severity: '',
   });
-  const [kanbanData, setKanbanData] = useState(initialKanbanData);
+  const [kanbanData, setKanbanData] = useState({
+    todo: { tasks: [] },
+    inProgress: { tasks: [] },
+    onHold: { tasks: [] },
+    completed: { tasks: [] },
+  });
   const [open, setOpen] = useState(false);
   const [taskDetails, setTaskDetails] = useState<TaskDetails>({
-    type: 'todo', // Set default type to 'todo' or any valid type
+    type: 'todo',
     title: '',
     severity: '',
     image: null,
     subtasks: [{ description: '' }],
   });
 
-  const validateForm = () => {
-    let errors: FormErrors = {
-      type: '',
-      title: '',
-      severity: '',
-    };
-    if (!taskDetails.type) {
-      errors.type = 'Task type is required.';
-    }
-  
-    if (!taskDetails.title.trim()) {
-      errors.title = 'Task title is required.';
-    }
-  
-    if (!taskDetails.severity) {
-      errors.severity = 'Severity is required.';
-    }
-  
-    if (Object.values(errors).some(error => error !== '')) {
-      setFormErrors(errors);
-    } else {
-      // If no errors, clear any existing errors
-      setFormErrors({
-        type: '',
-        title: '',
-        severity: '',
-      });
-    }
+  useEffect(() => {
+    axios
+      .get('http://127.0.0.1:8000/api/tasks/')
+      .then((response) => {
+        const fetchedTasks = response.data;
+        const tasksByStatus = fetchedTasks.reduce((acc, task) => {
+          acc[task.status] = acc[task.status] || [];
+          acc[task.status].push(task);
+          return acc;
+        }, {});
+        setKanbanData({
+          todo: { tasks: tasksByStatus.todo || [] },
+          inProgress: { tasks: tasksByStatus.inProgress || [] },
+          onHold: { tasks: tasksByStatus.onHold || [] },
+          completed: { tasks: tasksByStatus.completed || [] },
+        });
+      })
+      .catch((error) => console.error('Error fetching tasks:', error));
+    Drag();
+  }, []);
 
-    return Object.values(errors).every(error => error === '');
+  const validateForm = (): boolean => {
+    let errors: FormErrors = { type: '', title: '', severity: '' };
+    if (!taskDetails.type) errors.type = 'Task type is required.';
+    if (!taskDetails.title.trim()) errors.title = 'Task title is required.';
+    if (!taskDetails.severity) errors.severity = 'Severity is required.';
+    setFormErrors(errors);
+    return !Object.values(errors).some((error) => error !== '');
   };
+
   useEffect(() => {
     console.log('Component mounted. Initial kanban data:', kanbanData);
     Drag();
@@ -159,6 +166,13 @@ const TaskKanban: React.FC = () => {
   };
   const handleClose = () => {
     setOpen(false);
+    setTaskDetails({
+      type: 'todo',
+      title: '',
+      severity: '',
+      image: null,
+      subtasks: [{ description: '' }],
+    });
   };
   const handleSubtaskChange = (
     index: number,
@@ -189,8 +203,8 @@ const TaskKanban: React.FC = () => {
     }
   };
 
-  const handleAddTaskSubmit = () => {
-    console.log('Submitting task. Task details:', taskDetails);
+  {
+    /*const handleAddTaskSubmit = () => {
     if (!validateForm()) return;
 
     if (!kanbanData[taskDetails.type]) {
@@ -230,6 +244,46 @@ const TaskKanban: React.FC = () => {
       image: null,
       subtasks: [{ description: '' }],
     });
+  }; */
+  }
+
+  const handleAddTaskSubmit = async () => {
+    if (!validateForm()) return;
+  
+    const newTask = {
+      title: taskDetails.title,
+      status: taskDetails.type,
+      severity: taskDetails.severity,
+      subtasks: taskDetails.subtasks.map(subtask => ({
+        description: subtask.description,
+        completed: false, // Assuming new subtasks are not completed
+      })),
+    };
+  
+    if (taskDetails.image) {
+      alert('Image uploads with JSON payload are not supported. Please handle image uploads separately.');
+      return;
+    }
+  
+    try {
+      const response = await axios.post(
+        'http://127.0.0.1:8000/api/tasks/',
+        JSON.stringify(newTask),
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+      console.log('What is happening:', response.data);
+      const updatedTask = response.data;
+      const updatedTasks = { ...kanbanData };
+      updatedTasks[updatedTask.status].tasks.push(updatedTask);
+      setKanbanData(updatedTasks);
+      handleClose();
+    } catch (error) {
+      console.error('Error adding task:', error.response?.data || error);
+    }
   };
 
   return (
@@ -384,17 +438,13 @@ const TaskKanban: React.FC = () => {
         </div>
 
         <div className="mt-9 grid grid-cols-1 gap-7.5 sm:grid-cols-2 xl:grid-cols-4">
-          {Object.entries(kanbanData).map(([key, column], taskIndex) => (
-            <div key={key} className="swim-lane flex flex-col gap-5.5">
+          {Object.entries(kanbanData).map(([status, { tasks }]) => (
+            <div key={status} className="swim-lane flex flex-col gap-5.5">
               <h4 className="text-xl font-semibold text-black dark:text-white">
-                {column.title} ({column.count})
+                {status} ({tasks.length})
               </h4>
-              {column.tasks.map((task, index) => (
-                <TaskCard
-                  key={index}
-                  taskIndex={taskIndex * 100 + index}
-                  {...task}
-                />
+              {tasks.map((task, index) => (
+                <TaskCard key={index} taskIndex={index} {...task} />
               ))}
             </div>
           ))}
