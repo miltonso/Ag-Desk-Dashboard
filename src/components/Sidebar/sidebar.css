@@ -1,0 +1,103 @@
+/* General Sidebar Styles */
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 250px;
+  height: 100vh;
+  background-color: #2a3e52;
+  color: #fff;
+  transition: transform 0.3s ease;
+  z-index: 1000;
+}
+/* Ensure sidebar is always in view on large screens */
+.sidebar.open {
+  transform: translateX(0);
+}
+
+.sidebar.closed {
+  transform: translateX(-100%);
+}
+
+/* Header Styles */
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px;
+  background-color: #334257;
+  border-bottom: 1px solid #475569;
+}
+
+.sidebar-logo-link img {
+  max-width: 100%;
+  height: auto;
+}
+
+.menu-icon-button {
+  background-color: transparent;
+  border: none;
+  color: lightslategray;
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  @media (min-width: 1024px) {
+     display: none;
+   }
+}
+
+/* Navigation Menu Styles */
+.sidebar-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  overflow-y: auto;
+  height: calc(100vh - 60px); /* Adjust based on header height */
+}
+
+.sidebar-menu li {
+  padding: 10px 20px;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  padding: 12px 20px;
+  border-radius: 5px;
+  text-decoration: none;
+  color: #c1c8e4;
+}
+
+.nav-link:hover,
+.nav-link.active {
+  background-color: #1abc9c;
+  color: #fff;
+}
+
+.link-text {
+  display: inline-block;
+  font-size: 16px;
+  margin-bottom: 4;
+
+}
+
+.link-text-menu{
+    margin-bottom: 8px;
+}
+
+/* Add animations on hover */
+.nav-link:hover .MuiSvgIcon-root {
+  animation: icon-spin 0.6s linear;
+}
+
+@keyframes icon-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+

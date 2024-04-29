@@ -1,0 +1,58 @@
+.satellite-map-card {
+  max-width: 600px;
+  margin: 20px auto;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+.satellite-map-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 24px 0 rgba(0, 0, 0, 0.2);
+}
+
+.google-map {
+  height: 300px; /* Adjust height as needed */
+  border-radius: 0 0 10px 10px; /* Round only the bottom corners */
+  overflow: hidden;
+}
+
+.satellite-map-card .MuiTextField-root {
+    margin: 10px 0;
+    border-radius: 5px;
+    input {
+      padding: 12px;
+    }
+    label.Mui-focused {
+      color: #1e88e5;
+    }
+    .MuiOutlinedInput-root {
+      fieldset {
+        border-color: #ddd;
+      }
+      &:hover fieldset {
+        border-color: #ccc;
+      }
+      &.Mui-focused fieldset {
+        border-color: #1e88e5;
+      }
+    }
+  }
+  
+  /* Search button styling */
+  .satellite-map-card .MuiButton-root {
+    margin: 10px 0;
+    background-color: #1e88e5;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    text-transform: none;
+    box-shadow: none;
+    &:hover {
+      background-color: #1565c0;
+    }
+  }
+/* Style for TextField and Button can be added here if customization is needed */

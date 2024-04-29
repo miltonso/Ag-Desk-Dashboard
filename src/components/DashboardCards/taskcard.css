@@ -1,0 +1,67 @@
+.farm-tasks-card {
+    border-radius: 8px;
+    border: 1px solid #E0E0E0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease-in-out;
+    overflow: hidden;
+  }
+  
+  .farm-tasks-card:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  .card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #333;
+    text-align: center; /* Center the card title */
+  }
+  
+  .task-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    transition: background-color 0.3s ease;
+  }
+  
+  .task-item:hover {
+    background-color: #f8f8f8;
+  }
+  
+  .task-checkbox {
+    padding: 8px;
+  }
+  
+  .task-text {
+    flex-grow: 1;
+    margin-left: 8px;
+  }
+  
+  .task-text.completed {
+    text-decoration: line-through;
+    color: #9e9e9e;
+  }
+  
+  .task-chip {
+    font-size: 0.75rem;
+    font-weight: 500;
+    border-radius: 4px;
+    margin-left: 8px;
+  }
+  
+  .task-chip.high {
+    background-color: #ff5252;
+    color: white;
+  }
+  
+  .task-chip.medium {
+    background-color: #ffb142;
+    color: white;
+  }
+  
+  .task-chip.low {
+    background-color: #2ed573;
+    color: white;
+  }
+  

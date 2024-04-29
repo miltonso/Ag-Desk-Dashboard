@@ -1,0 +1,91 @@
+/* EmployeeTable.css */
+.table-container {
+    max-width: 100%;
+    overflow-x: auto;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .table-heading {
+    text-align: center;
+    font-size: 1.5rem; /* 24px */
+    font-weight: 600;
+    padding: 1rem; /* 16px */
+    margin: 0;
+    background-color: white; /* Light grey background for the heading */
+  }
+  
+  .table {
+    border-radius: 8px;
+    width: 100%;
+    border-collapse: collapse; /* Remove space between cells */
+    margin-bottom: 0;
+  }
+  
+  .table th {
+    background-color: #f5f5f5; /* Light grey background for header */
+  }
+  
+  .table th,
+  .table td {
+    border: 1px solid #e0e0e0; /* Light grey border for cells */
+    text-align: left;
+    padding: 8px; /* Padding within cells */
+  }
+  
+  .table .employee-image {
+    width: 40px; /* Adjust size of image */
+    height: 40px;
+    border-radius: 20px; /* Round edges for image */
+    object-fit: cover;
+  }
+  
+  .table-row:hover {
+    background-color: #eef5ff; /* Light blue background on hover */
+  }
+  
+  /* Enhance the look of the table on smaller screens */
+  @media (max-width: 768px) {
+    .table th,
+    .table td {
+      padding: 10px; /* Increase padding for better readability on small devices */
+    }
+  }
+  
+  /* Add modern hover effects for the rows */
+  .table-row {
+    transition: background-color 0.3s ease;
+  }
+  
+  .table-row:hover .employee-image {
+    transform: scale(1.1); /* Slightly increase image size on hover */
+    transition: transform 0.3s ease;
+  }
+  
+  /* Add styles for specific cell content */
+  .table-cell-name {
+    font-weight: bold; /* Make name bold */
+  }
+  
+  .table-cell-salary {
+    color: #4caf50; /* Green color for salary to stand out */
+  }
+  
+  .table-cell-status {
+    font-weight: bold;
+    color: #ff9800; /* Orange color for status */
+  }
+  
+  /* If status is 'Active', apply a specific style */
+  .table-cell-status.active {
+    color: #4caf50; /* Green color for active status */
+  }
+  
+  /* For hover effect on the entire row */
+  .table-row:hover {
+    box-shadow: 0 10px 20px -10px rgba(0, 0, 0, 0.2);
+    cursor: pointer; /* Change cursor to indicate interactivity */
+  }
+  

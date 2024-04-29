@@ -1,0 +1,102 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #e2e8f0; /* Example border color */
+  border-radius: 0.5rem; /* Example border radius */
+  background-color: white;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  height: 300px; /* Fixed height */
+  overflow: hidden; /* Hide overflow */
+}
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+}
+
+.card-content {
+  flex: 1; /* Flex child to take up available space */
+  overflow-y: auto;
+  padding: 1rem; /* Allow vertical scroll if content overflows */
+}
+
+.list-item:last-child {
+  padding-bottom: 1rem;
+}
+
+.typography-h5 {
+  font-size: 1.25rem; /* 20px */
+  font-weight: 500;
+  margin-bottom: 0.5rem; /* 8px */
+}
+
+/* Bigger heading for Todos card */
+.todo-card-header {
+  font-size: 1.5rem; /* 24px */
+  font-weight: 600;
+  color: #333; /* Darker text for better contrast */
+}
+
+/* Improved TextField styling */
+.text-field-outlined {
+  margin: 0.5rem 0;
+}
+
+/* Button icon styling */
+.add-icon {
+  color: #1c64f2; /* Example primary color */
+}
+
+/* Add a subtle animation to the badge for when inventory is low */
+.warning-icon {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.weather-card {
+  text-align: center; /* Center align the text */
+}
+
+.weather-icon {
+  width: 100%; /* Full container width */
+  display: flex; /* Use flex to center children horizontally */
+  justify-content: center; /* Center children horizontally */
+  margin-bottom: 1rem; /* Margin bottom for spacing */
+  font-size: 4rem;
+}
+
+.weather-temp {
+  font-size: 2rem; /* Bigger font size for temperature */
+  font-weight: bold; /* Bold font weight for emphasis */
+  margin-bottom: 0.5rem; /* Margin bottom for spacing */
+}
+
+.weather-details {
+  color: #666; /* Lighter text color for secondary details */
+  font-size: 0.875rem; /* Smaller font size for details */
+}
+.weather-card-title {
+  font-size: 5.5rem; /* Increased font size */
+  font-weight: 600; /* Bold font weight */
+  margin-bottom: 0.5rem; /* Margin bottom for spacing */
+  display: block; /* Make the title block to fill the width */
+}
+
+.weather-icon-container {
+  display: flex;
+  justify-content: center; /* Center children horizontally */
+  align-items: center; /* Center children vertically */
+  margin-bottom: 1rem; /* Margin bottom for spacing */
+  height: 128px; /* Increased height for larger icon */
+}

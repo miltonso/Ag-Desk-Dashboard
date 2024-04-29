@@ -1,0 +1,14 @@
+.card {
+    min-width: 0; /* for flexbox to allow shrinking below content size */
+    max-width: 300px; /* adjust to your preference */
+    width: 100%; /* ensures it takes up available space */
+    box-shadow: 0px 4px 10px rgba(0,0,0,0.05); /* Optional: for consistent shadow */
+    border-radius: 8px; /* Optional: for consistent border radius */
+  }
+  
+  /* Ensure the grid's auto-rows are set to min-content so cards with less content don't stretch */
+  .grid {
+    grid-auto-rows: min-content;
+  }
+  
+  

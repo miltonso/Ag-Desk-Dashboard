@@ -1,0 +1,111 @@
+/* Calendar container */
+.calendar-container {
+  max-width: 100%;
+  border: none;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Event styles */
+.event-primary {
+  background-color: #1a97f5;
+  color: white;
+}
+.event-success {
+  background-color: #00ab55;
+  color: white;
+}
+.event-danger {
+  background-color: #fc4b6c;
+  color: white;
+}
+.event-info {
+  background-color: #1e4db7;
+  color: white;
+}
+.event-warning {
+  background-color: #fdd43f;
+  color: #333;
+}
+
+/* Event hover effect */
+.rbc-event {
+  transition: transform 0.1s ease-in-out;
+}
+.rbc-event:hover {
+  transform: scale(1.05);
+  z-index: 1;
+}
+
+/* Button styling */
+.mui-btn {
+  margin: 10px;
+  border-radius: 8px;
+  transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+  width: auto; /* Or set to a specific width if you prefer */
+  padding: 0 15px;
+
+}
+.mui-btn:hover {
+  background-color: #333;
+}
+
+/* Modal styling */
+.modal-box {
+  background-color: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  animation: modal-in 0.3s ease-in-out forwards;
+}
+
+@keyframes modal-in {
+  0% {
+    transform: translateY(-50px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+
+
+.modal-box .btn-primary {
+  background-color: #1a97f5;
+  color: white;
+  
+}
+.modal-box .btn-success {
+  background-color: #00ab55;
+  color: white;
+}
+.modal-box .btn-success:hover {
+  background-color: #00793c
+}
+.modal-box .btn-danger {
+  background-color: #fc4b6c;
+  color: white;
+}
+.modal-box .btn-danger:hover {
+  background-color: #c51162;
+}
+.modal-box .btn-info {
+  background-color: #1e4db7;
+  color: white;
+}
+.modal-box .btn-info:hover {
+  background-color: #003c8f;
+}
+.modal-box .btn-warning {
+  background-color: #fdd43f;
+  color: #333;
+}
+.modal-box .btn-warning:hover {
+  background-color: #b29b00;
+}
+
+.colorbg{
+    width: 90px;
+    margin-top: 9px;
+}
