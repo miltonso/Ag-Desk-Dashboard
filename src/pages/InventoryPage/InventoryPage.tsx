@@ -17,89 +17,31 @@ import {
   DialogActions,
   IconButton,
 } from '@mui/material';
-import { DataGrid, GridPaginationModel } from '@mui/x-data-grid';
+import { DataGrid } from '@mui/x-data-grid';
 import AddIcon from '@mui/icons-material/Add';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import './inventorypage.css';
+import { useEffect } from 'react';
+import {
+  fetchInventoryItems,
+  createInventoryItem,
+  updateInventoryItem,
+  deleteInventoryItem,
+} from './api';
 
-// Dummy data for the table
-const initialRows = [
-  {
-    id: 1,
-    name: 'Wheat Seeds',
-    type: 'seeds',
-    quantity: '200kg',
-    status: 'Operational',
-    lastService: '-',
-    serviceDetails: '-',
-    nextService: '-',
-  },
-  {
-    id: 2,
-    name: 'Tractor',
-    type: 'machinery',
-    quantity: '1',
-    status: 'Needs repair',
-    lastService: '2021-10-12',
-    serviceDetails: 'Engine oil change',
-    nextService: '2022-10-12',
-  },
-  {
-    id: 3,
-    name: 'Fertilizer',
-    type: 'fertilizers',
-    quantity: '50kg',
-    status: 'Operational',
-    lastService: '-',
-    serviceDetails: '-',
-    nextService: '-',
-  },
-  {
-    id: 4,
-    name: 'Hoe',
-    type: 'tools',
-    quantity: '5',
-    status: 'Operational',
-    lastService: '-',
-    serviceDetails: '-',
-    nextService: '-',
-  },
-  {
-    id: 5,
-    name: 'Truck',
-    type: 'vehicles',
-    quantity: '1',
-    status: 'Operational',
-    lastService: '-',
-    serviceDetails: '-',
-    nextService: '-',
-  },
-  // ... more rows
-];
-const inventoryTypes = [
-  'seeds',
-  'fertilizers',
-  'feed',
-  'tools',
-  'machinery',
-  'vehicles',
-];
+const inventoryTypes = ['seeds', 'fertilizers', 'feed', 'tools', 'machinery'];
 const statusOptions = ['operational', 'needs repair', 'service due'];
 
 const InventoryPage = () => {
-  const [pagination, setPagination] = useState<GridPaginationModel>({
-    page: 1,
-    pageSize: 5,
-  });
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
-  const [editMode, setEditMode] = useState(false); // new state to track if we're in edit mode
-  const [editingRow, setEditingRow] = useState(null); // state to keep track of the row being edited
+  const [rows, setRows] = useState([]);
   const [open, setOpen] = useState(false);
-  const [rows, setRows] = useState(initialRows);
+  const [editMode, setEditMode] = useState(false);
+  const [editingRow, setEditingRow] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
     type: '',
@@ -110,16 +52,12 @@ const InventoryPage = () => {
     nextService: '',
   });
 
-  const handleEditOpen = (row) => {
-    setEditMode(true);
-    setEditingRow(row);
-    setFormData(row); // Pre-fill the form with the data from the row to be edited
-    setOpen(true);
-  };
+  useEffect(() => {
+    fetchInventoryItems().then(setRows).catch(console.error);
+  }, []);
 
-  const handleEditClose = () => {
+  const handleOpen = () => {
     setEditMode(false);
-    setEditingRow(null);
     setFormData({
       name: '',
       type: '',
@@ -129,30 +67,11 @@ const InventoryPage = () => {
       serviceDetails: '',
       nextService: '',
     });
+    setOpen(true);
+  };
+
+  const handleClose = () => {
     setOpen(false);
-  };
-
-  const handleUpdate = (event) => {
-    event.preventDefault();
-    const updatedRows = rows.map((row) => {
-      if (row.id === editingRow.id) {
-        return { ...row, ...formData };
-      }
-      return row;
-    });
-    setRows(updatedRows);
-    handleEditClose(); // Close the edit dialog and reset edit mode
-  };
-
-  const handleDelete = (id) => {
-    // Filter out the row to delete and update state
-    setRows(rows.filter((row) => row.id !== id));
-  };
-
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
-  const handlePaginationModelChange = (newModel: GridPaginationModel) => {
-    setPagination(newModel);
   };
 
   const handleChange = (event) => {
@@ -160,45 +79,70 @@ const InventoryPage = () => {
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    let quantityWithUnit = formData.quantity;
-    if (formData.type === 'seeds' || formData.type === 'feed') {
-      quantityWithUnit += ' kg';
-    }
+  const handleEditOpen = (row) => {
+    console.log('Editing Row Data:', row); // Check what data is actually in the row
+    setEditMode(true);
+    setEditingRow(row);
 
-    const newRow = {
-      id: rows.length + 1,
+    // Ensure all fields are correctly set, consider using fallbacks for optional fields
+    setFormData({
+      name: row.name,
+      type: row.item_type || '', // Make sure the property name matches the expected form state
+      quantity: row.quantity.toString(), // Ensure quantity is a string if your TextField expects a string
+      status: row.status,
+      lastService: row.last_service_date || '', // Use fallback for dates
+      serviceDetails: row.service_details || '',
+      nextService: row.next_service_date || '',
+    });
+
+    setOpen(true);
+  };
+
+  const handleEditClose = () => {
+    setEditMode(false);
+    setEditingRow(null);
+    handleClose();
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    console.log('Form data:', formData);
+    const data = {
       name: formData.name,
-      type: formData.type,
-      quantity: quantityWithUnit,
+      item_type: formData.type, // Change to item_type to match the backend
+      quantity: parseInt(formData.quantity), // Ensure quantity is an integer
       status: formData.status,
-      lastService: formData.lastService || '-',
-      serviceDetails: formData.serviceDetails || '-',
-      nextService: formData.nextService || '-',
+      last_service_date: formData.lastService, // Match the backend field name
+      service_details: formData.serviceDetails, // Match the backend field name
+      next_service_date: formData.nextService, // Match the backend field name
     };
 
-    setRows([...rows, newRow]);
-    setFormData({
-      name: '',
-      type: '',
-      quantity: '',
-      status: '',
-      lastService: '',
-      serviceDetails: '',
-      nextService: '',
-    });
+    if (editMode) {
+      await updateInventoryItem(editingRow.id, data);
+      const updatedRows = rows.map((row) =>
+        row.id === editingRow.id ? { ...row, ...data } : row
+      );
+      setRows(updatedRows);
+    } else {
+      const newItem = await createInventoryItem(data);
+      setRows([...rows, newItem]);
+    }
     handleClose();
+  };
+
+  const handleDelete = async (id) => {
+    await deleteInventoryItem(id);
+    setRows(rows.filter((row) => row.id !== id));
   };
 
   const columns = [
     { field: 'name', headerName: 'Inventory Name', width: 150 },
-    { field: 'type', headerName: 'Inventory Type', width: 130 },
+    { field: 'item_type', headerName: 'Inventory Type', width: 130 },
     { field: 'quantity', headerName: 'Quantity', width: 100 },
     { field: 'status', headerName: 'Status', width: 120 },
-    { field: 'lastService', headerName: 'Last Service Date', width: 150 },
-    { field: 'serviceDetails', headerName: 'Service Details', width: 150 },
-    { field: 'nextService', headerName: 'Next Service Due', width: 150 },
+    { field: 'last_service_date', headerName: 'Last Service Date', width: 150 },
+    { field: 'service_details', headerName: 'Service Details', width: 150 },
+    { field: 'next_service_date', headerName: 'Next Service Due', width: 150 },
     {
       field: 'actions',
       headerName: 'Actions',
@@ -218,7 +162,6 @@ const InventoryPage = () => {
       },
     },
   ];
-
   return (
     <DefaultLayout>
       <Breadcrumb pageName="Inventory Management" />
@@ -233,33 +176,35 @@ const InventoryPage = () => {
           >
             Add Inventory Item
           </Button>
-          <Paper style={{ height: 400, width: '100%' }} className="data-grid-container">
+          <Paper
+            style={{ height: 400, width: '100%' }}
+            className="data-grid-container"
+          >
             <DataGrid
               rows={rows}
               columns={columns}
               autoPageSize
-              pagination // Enable pagination
-              paginationMode="client" // Set pagination mode to client or server
+              pagination
               checkboxSelection
             />
           </Paper>
           <Dialog
             fullScreen={fullScreen}
             open={open}
-            onClose={editMode ? handleEditClose : handleClose}
+            onClose={handleClose}
             aria-labelledby="inventory-dialog"
-            className="dialog-content"
           >
             <DialogTitle id="inventory-dialog">
-            {editMode ? 'Edit Inventory Item' : 'Add Inventory Item'}
+              {editMode ? 'Edit Inventory Item' : 'Add Inventory Item'}
             </DialogTitle>
             <DialogContent>
               <Box
                 component="form"
-                onSubmit={editMode ? handleUpdate : handleSubmit}
+                onSubmit={handleSubmit}
                 noValidate
                 sx={{ mt: 1 }}
               >
+                {/* Form Fields */}
                 <TextField
                   autoFocus
                   margin="dense"
@@ -277,8 +222,7 @@ const InventoryPage = () => {
                   <Select
                     labelId="type-label"
                     name="type"
-                    label="Inventory Type"
-                    value={formData.type}
+                    value={formData.type || ''} // Fallback to an empty string if formData.type is undefined
                     onChange={handleChange}
                     required
                   >
@@ -298,23 +242,18 @@ const InventoryPage = () => {
                   variant="outlined"
                   value={formData.quantity}
                   onChange={handleChange}
-                  helperText={
-                    formData.type === 'seeds' || formData.type === 'feed'
-                      ? 'Quantity in kilograms'
-                      : 'Quantity'
-                  }
                 />
                 <FormControl fullWidth margin="dense">
                   <InputLabel id="status-label">Status</InputLabel>
                   <Select
                     labelId="status-label"
                     name="status"
-                    label="Status"
                     value={formData.status}
                     onChange={handleChange}
+                    required
                   >
-                    {statusOptions.map((status, index) => (
-                      <MenuItem key={index} value={status}>
+                    {statusOptions.map((status) => (
+                      <MenuItem key={status} value={status}>
                         {status.charAt(0).toUpperCase() + status.slice(1)}
                       </MenuItem>
                     ))}
@@ -357,11 +296,11 @@ const InventoryPage = () => {
                   onChange={handleChange}
                 />
                 <DialogActions>
-                <Button onClick={editMode ? handleEditClose : handleClose} color="primary">
+                  <Button onClick={handleEditClose} color="primary">
                     Cancel
                   </Button>
                   <Button type="submit" color="primary">
-                  {editMode ? 'Update' : 'Add'}
+                    {editMode ? 'Update' : 'Add'}
                   </Button>
                 </DialogActions>
               </Box>

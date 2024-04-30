@@ -23,8 +23,9 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include('farm_management.urls')),  # Add 'api/' prefix here
+    path('api/', include('farm_management.urls')),  
     path('', include('farm_management.auth_urls')),  # Authentication routes directly under root
-    path('employee/', include('employee_management.urls')),  # Correctly prefixed for employee management routes
+    path('employee/', include('employee_management.urls')),  
+    path('inventory/', include('inventory_management.urls')),  
     
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

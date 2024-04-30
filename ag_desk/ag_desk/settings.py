@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "corsheaders",
     "employee_management",
+    "inventory_management",
 ]
 
 MIDDLEWARE = [
