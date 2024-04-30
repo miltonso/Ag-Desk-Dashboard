@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -27,12 +28,17 @@ DEBUG = True
 
 # Use the following configuration to allow all domains during development:
 CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
 
 # Or specify your front-end domain
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5174",
-    "http://127.0.0.1:5174",
-]
+
+# CSRF settings
+CSRF_COOKIE_HTTPONLY = False
+
+# Base directory for media files
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+# URL to access media files
+MEDIA_URL = '/media/'
 
 
 # Application definition
@@ -47,9 +53,11 @@ INSTALLED_APPS = [
     "farm_management",
     "rest_framework",
     "corsheaders",
+    "employee_management",
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -57,7 +65,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "corsheaders.middleware.CorsMiddleware",
+    
 ]
 
 ROOT_URLCONF = "ag_desk.urls"

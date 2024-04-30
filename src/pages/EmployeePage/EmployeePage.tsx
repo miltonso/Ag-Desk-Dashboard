@@ -1,4 +1,5 @@
 import DefaultLayout from '../../layout/DefaultLayout';
+import { useEffect } from 'react';
 import Breadcrumb from '../../components/Breadcrumbs/Breadcrumb';
 import { useState } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
@@ -15,6 +16,8 @@ import {
   useTheme,
   useMediaQuery,
   MenuItem,
+  Snackbar,
+  Alert,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
@@ -22,145 +25,125 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { useFormik } from 'formik';
 import * as yup from 'yup';
 import User17 from '../../images/user/user-17.png';
-import User18 from '../../images/user/user-18.png';
-import User19 from '../../images/user/user-19.png';
-import User20 from '../../images/user/user-20.png';
-
-const employeeData = [
-  {
-    id: 1,
-    image: User17,
-    name: 'John Doe',
-    position: 'Harvester',
-    contactNumber: '123-456-7890',
-    email: 'johndoe@example.com',
-    startDate: '2020-01-10',
-    shiftSchedule: 'Morning Shift',
-    salary: '$15/hour',
-    skills: 'Tractor Operation, First Aid',
-    status: 'Active',
-  },
-  {
-    id: 2,
-    image: User18,
-    name: 'Jane Doe',
-    position: 'Irrigator',
-    contactNumber: '123-456-7890',
-    email: 'janedone@example.com',
-    startDate: '2020-01-10',
-    shiftSchedule: 'Evening Shift',
-    salary: '$12/hour',
-    skills: 'Irrigation Management',
-    status: 'Active',
-  },
-  {
-    id: 3,
-    image: User19,
-    name: 'Alice Smith',
-    position: 'Supervisor',
-    contactNumber: '123-456-7890',
-    email: 'Alicesmith@asda.com',
-    startDate: '2020-01-10',
-    shiftSchedule: 'Morning Shift',
-    salary: '$20/hour',
-    skills: 'Leadership, Communication',
-    status: 'Active',
-  },
-  {
-    id: 4,
-    image: User20,
-    name: 'Bob Johnson',
-    position: 'Tractor Operator',
-    contactNumber: '123-456-7890',
-    email: 'bobjonhson@aasd.com',
-    startDate: '2020-01-10',
-    shiftSchedule: 'Night Shift',
-    salary: '$15/hour',
-    skills: 'Tractor Operation, Maintenance',
-    status: 'Active',
-  },
-
-  // More employees
-];
-
-const validationSchema = yup.object({
-  name: yup.string().required('Employee name is required'),
-  contactNumber: yup.string().required('Contact number is required'),
-  email: yup
-    .string()
-    .email('Enter a valid email')
-    .required('Email is required'),
-  position: yup.string().required('Position is required'),
-});
+import {
+  fetchEmployees,
+  createEmployee,
+  updateEmployee,
+  deleteEmployee,
+  API_URL,
+} from './api';
 
 const EmployeePage = () => {
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
-  const [employees, setEmployees] = useState(employeeData);
+  const [employees, setEmployees] = useState([]);
   const [open, setOpen] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [currentEmployee, setCurrentEmployee] = useState(null);
+  const [error, setError] = useState('');
+  const [openSnackbar, setOpenSnackbar] = useState(false);
   const formik = useFormik({
     initialValues: {
       image: '',
       name: '',
-      position: '',
+      role: '',
+      section: '',
       contactNumber: '',
       email: '',
-      startDate: '',
-      shiftSchedule: '',
+      startDate: new Date().toISOString().split('T')[0], // Today's date
       salary: '',
-      skills: '',
       status: 'Active',
+      photo: '',
     },
-    validationSchema: validationSchema,
-    onSubmit: (values) => {
-      if (editMode) {
-        const updatedEmployees = employees.map((employee) =>
-          employee.id === currentEmployee.id
-            ? { ...employee, ...values }
-            : employee
-        );
-        setEmployees(updatedEmployees);
-      } else {
-        const newEmployee = {
-          id: employees.length + 1,
+    validationSchema: yup.object({
+      name: yup.string().required('Employee name is required'),
+      role: yup.string().required('Role is required'),
+      section: yup.string().required('Section is required'),
+      email: yup
+        .string()
+        .email('Enter a valid email')
+        .required('Email is required'),
+      startDate: yup.date().required('Start date is required'), // Add validation for start date
+    }),
+    onSubmit: async (values) => {
+      try {
+        const formData = {
           ...values,
-          image: User17, // Use a default image or handle file upload
+          startDate: new Date(values.startDate).toISOString().split('T')[0],
         };
-        setEmployees([...employees, newEmployee]);
+
+        if (editMode) {
+          const updatedEmployee = await updateEmployee(
+            currentEmployee.employee_id,
+            formData
+          );
+          const updatedEmployees = employees.map((emp) =>
+            emp.id === currentEmployee.id ? updatedEmployee : emp
+          );
+          setEmployees(updatedEmployees);
+        } else {
+          const newEmployee = await createEmployee(formData);
+          setEmployees([...employees, newEmployee]);
+        }
+
+        setOpen(false);
+        setError('');
+      } catch (e) {
+        setError('Failed to perform the operation.');
+        setOpenSnackbar(true);
+        console.error(e);
       }
-      setOpen(false);
-      setEditMode(false);
-      setCurrentEmployee(null);
     },
   });
+
+  useEffect(() => {
+    fetchEmployees()
+      .then(setEmployees)
+      .catch((e) => {
+        setError('Failed to fetch employees.');
+        setOpenSnackbar(true);
+        console.error(e);
+      });
+  }, []);
 
   const handleClose = () => {
     setOpen(false);
     setEditMode(false);
     formik.resetForm();
     setCurrentEmployee(null);
+    setError('');
+    setOpenSnackbar(false);
   };
 
   const handleEditOpen = (employee) => {
+    console.log('Editing employee:', employee);
     setEditMode(true);
     setCurrentEmployee(employee);
-    formik.setValues(employee);
+    formik.setValues({
+      ...employee,
+      startDate: new Date(employee.start_date).toISOString().split('T')[0],
+      photo: '',
+    });
     setOpen(true);
   };
-  const handleDeleteEmployee = (id) => {
-    setEmployees(employees.filter((emp) => emp.id !== id));
+  const handleDelete = async (employeeId) => {
+    try {
+      await deleteEmployee(employeeId);
+      setEmployees(employees.filter((emp) => emp.employee_id !== employeeId));
+      setError('');
+    } catch (e) {
+      setError('Failed to delete employee.');
+      setOpenSnackbar(true);
+      console.error(e);
+    }
   };
-
-
 
   const columns = [
     {
       field: 'image',
       headerName: 'Photo',
       renderCell: (params) => (
-        <Avatar src={params.value} alt={params.row.name} />
+        <Avatar src={params.value ? `${API_URL}${params.value}` : ''} alt={params.row.name} />
       ),
     },
     {
@@ -170,9 +153,15 @@ const EmployeePage = () => {
       editable: true,
     },
     {
-      field: 'position',
-      headerName: 'Position',
+      field: 'role',
+      headerName: 'Role',
       width: 130,
+      editable: true,
+    },
+    {
+      field: 'section',
+      headerName: 'Section',
+      width: 80,
       editable: true,
     },
     {
@@ -188,27 +177,15 @@ const EmployeePage = () => {
       editable: true,
     },
     {
-      field: 'startDate',
+      field: 'start_date',
       headerName: 'Start Date',
       width: 130,
-      editable: true,
-    },
-    {
-      field: 'shiftSchedule',
-      headerName: 'Shift Schedule',
-      width: 150,
       editable: true,
     },
     {
       field: 'salary',
       headerName: 'Salary',
       width: 100,
-      editable: true,
-    },
-    {
-      field: 'skills',
-      headerName: 'Skills',
-      width: 150,
       editable: true,
     },
     {
@@ -222,8 +199,6 @@ const EmployeePage = () => {
       ),
       editable: true,
     },
-
-    // ... other columns
     {
       field: 'actions',
       headerName: 'Actions',
@@ -232,7 +207,7 @@ const EmployeePage = () => {
           <IconButton onClick={() => handleEditOpen(params.row)}>
             <EditIcon />
           </IconButton>
-          <IconButton onClick={() => handleDeleteEmployee(params.id)}>
+          <IconButton onClick={() => handleDelete(params.row.employee_id)}>
             <DeleteIcon />
           </IconButton>
         </>
@@ -252,12 +227,16 @@ const EmployeePage = () => {
       >
         Add Employee
       </Button>
-      <div style={{ height: 400, width: '100%' }} className="data-grid-container">
+      <div
+        style={{ height: 400, width: '100%' }}
+        className="data-grid-container"
+      >
         <DataGrid
           rows={employees}
           columns={columns}
           autoPageSize
           checkboxSelection
+          getRowId={(row) => row.employee_id}
         />
       </div>
       <Dialog
@@ -284,6 +263,35 @@ const EmployeePage = () => {
                   error={formik.touched.name && Boolean(formik.errors.name)}
                   helperText={formik.touched.name && formik.errors.name}
                 />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  select
+                  margin="normal"
+                  fullWidth
+                  id="role"
+                  label="Role"
+                  name="role"
+                  {...formik.getFieldProps('role')}
+                >
+                  <MenuItem value="manager">Manager</MenuItem>
+                  <MenuItem value="employee">Employee</MenuItem>
+                </TextField>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  select
+                  margin="normal"
+                  fullWidth
+                  id="section"
+                  label="Section"
+                  name="section"
+                  {...formik.getFieldProps('section')}
+                >
+                  <MenuItem value="A">A</MenuItem>
+                  <MenuItem value="B">B</MenuItem>
+                  <MenuItem value="C">C</MenuItem>
+                </TextField>
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField
@@ -317,17 +325,6 @@ const EmployeePage = () => {
                 />
               </Grid>
 
-              {/* Position */}
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  margin="normal"
-                  fullWidth
-                  id="position"
-                  label="Position"
-                  name="position"
-                  {...formik.getFieldProps('position')}
-                />
-              </Grid>
               {/* Start Date */}
               <Grid item xs={12} sm={6}>
                 <TextField
@@ -341,17 +338,6 @@ const EmployeePage = () => {
                   {...formik.getFieldProps('startDate')}
                 />
               </Grid>
-              {/* Shift Schedule */}
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  margin="normal"
-                  fullWidth
-                  id="shiftSchedule"
-                  label="Shift Schedule"
-                  name="shiftSchedule"
-                  {...formik.getFieldProps('shiftSchedule')}
-                />
-              </Grid>
               {/* Salary */}
               <Grid item xs={12} sm={6}>
                 <TextField
@@ -363,17 +349,7 @@ const EmployeePage = () => {
                   {...formik.getFieldProps('salary')}
                 />
               </Grid>
-              {/* Skills */}
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  margin="normal"
-                  fullWidth
-                  id="skills"
-                  label="Skills"
-                  name="skills"
-                  {...formik.getFieldProps('skills')}
-                />
-              </Grid>
+
               {/* Status */}
               <Grid item xs={12} sm={6}>
                 <TextField
@@ -393,19 +369,19 @@ const EmployeePage = () => {
               <Grid item xs={12} sm={6}>
                 <input
                   id="file"
-                  name="image"
+                  name="photo"
                   type="file"
                   onChange={(event) => {
                     if (event.currentTarget.files) {
                       formik.setFieldValue(
-                        'image',
+                        'photo',
                         event.currentTarget.files[0]
                       );
                     }
                   }}
                 />
-                {formik.errors.image && formik.touched.image && (
-                  <p>{formik.errors.image}</p>
+                {formik.errors.photo && formik.touched.photo && (
+                  <p>{formik.errors.photo}</p>
                 )}
               </Grid>
 
@@ -420,6 +396,19 @@ const EmployeePage = () => {
           </Button>
         </DialogActions>
       </Dialog>
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={6000}
+        onClose={() => setOpenSnackbar(false)}
+      >
+        <Alert
+          onClose={() => setOpenSnackbar(false)}
+          severity="error"
+          sx={{ width: '100%' }}
+        >
+          {error}
+        </Alert>
+      </Snackbar>
     </DefaultLayout>
   );
 };

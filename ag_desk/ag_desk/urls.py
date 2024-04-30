@@ -17,10 +17,14 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from django.urls import include
+from django.conf import settings
+from django.conf.urls.static import static
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('farm_management.urls')),  # Add 'api/' prefix here
+    path('', include('farm_management.auth_urls')),  # Authentication routes directly under root
+    path('employee/', include('employee_management.urls')),  # Correctly prefixed for employee management routes
     
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

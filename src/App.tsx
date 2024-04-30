@@ -9,6 +9,8 @@ import InventoryPage from './pages/InventoryPage/InventoryPage';
 import Loader from './common/Loader';
 import PageTitle from './components/PageTitle';
 import EmployeePage from './pages/EmployeePage/EmployeePage';
+import SignIn from './pages/Authentication/SignIn';
+import SignUp from './pages/Authentication/SignUp';
 
 function App() {
   const [loading, setLoading] = useState<boolean>(true);
@@ -72,6 +74,8 @@ function App() {
             </>
           }
         />
+        <Route path="/signin" element={<SignIn />} />
+        <Route path="/signup" element={<SignUp />} />
       </Routes>
     </>
   );

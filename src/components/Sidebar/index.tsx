@@ -5,6 +5,7 @@ import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import LayersIcon from '@mui/icons-material/Layers';
 import PeopleIcon from '@mui/icons-material/People';
 import Inventory2Icon from '@mui/icons-material/Inventory2';
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import './sidebar.css';
 
 const icons = {
@@ -20,7 +21,32 @@ interface SidebarProps {
   setSidebarOpen: (arg: boolean) => void;
 }
 
+interface Farm {
+  id: string;
+  name: string;
+}
+
 const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
+  const [farms, setFarms] = useState<Farm[]>([
+    { id: 'default', name: 'Main Farm' }, // Default farm
+  ]);
+  const [activeFarm, setActiveFarm] = useState<Farm>(farms[0]);
+
+  const handleAddFarm = () => {
+    const farmName = prompt('Please enter the new farm name:');
+    if (farmName) {
+      const newFarm = { id: Date.now().toString(), name: farmName };
+      setFarms([...farms, newFarm]);
+    }
+  };
+
+  const handleFarmChange = (farmId: string) => {
+    const selectedFarm = farms.find((farm) => farm.id === farmId);
+    if (selectedFarm) {
+      setActiveFarm(selectedFarm);
+    }
+  };
+
   const getNavLinkClass = (path) => {
     return location.pathname === path ? 'nav-link active' : 'nav-link';
   };
@@ -113,6 +139,18 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
       {/* <!-- SIDEBAR HEADER --> */}
 
       <div className="no-scrollbar flex flex-col overflow-y-auto duration-300 ease-linear">
+        {/* Dropdown for selecting active farm */}
+        <select
+          className="dark:bg-dark-secondary mx-4 my-4 rounded bg-white p-2"
+          onChange={(e) => handleFarmChange(e.target.value)}
+          value={activeFarm.id}
+        >
+          {farms.map((farm) => (
+            <option key={farm.id} value={farm.id}>
+              {farm.name}
+            </option>
+          ))}
+        </select>
         {/* <!-- Sidebar Menu --> */}
         <nav className="mt-5 px-4 py-4 lg:mt-9 lg:px-6">
           {/* <!-- Menu Group --> */}
@@ -175,6 +213,16 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
           </div>
         </nav>
         {/* <!-- Sidebar Menu --> */}
+        {/* Add Farm Button */}
+        <div className="mx-4 my-2">
+          <button
+            className="flex w-full items-center justify-center gap-2 rounded bg-green-500 px-4 py-2 text-white"
+            onClick={handleAddFarm}
+          >
+            <AddCircleOutlineIcon />
+            Add Farm
+          </button>
+        </div>
       </div>
     </aside>
   );

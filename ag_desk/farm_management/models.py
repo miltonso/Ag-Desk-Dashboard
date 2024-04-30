@@ -1,24 +1,29 @@
 from django.db import models
 from django.conf import settings
+from django.contrib.auth.models import User
+
 
 
 class Task(models.Model):
     STATUS_CHOICES = [
-        ("todo", "To Do",),
+        (
+            "todo",
+            "To Do",
+        ),
         ("inProgress", "In Progress"),
         ("onHold", "On Hold"),
         ("completed", "Completed"),
     ]
-    
+
     SEVERITY_CHOICES = [
-        ('high', 'High'),
-        ('medium', 'Medium'),
-        ('low', 'Low'),
+        ("high", "High"),
+        ("medium", "Medium"),
+        ("low", "Low"),
     ]
     title = models.CharField(max_length=255)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="todo")
-    severity = models.CharField(max_length=6, choices=SEVERITY_CHOICES, default='low')
-    image = models.ImageField(upload_to='task_images/', null=True, blank=True)
+    severity = models.CharField(max_length=6, choices=SEVERITY_CHOICES, default="low")
+    image = models.ImageField(upload_to="task_images/", null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -62,16 +67,10 @@ class InventoryItem(models.Model):
         return self.name
 
 
-class Employee(models.Model):
-    name = models.CharField(max_length=255)
-    position = models.CharField(max_length=255)
-    contact_number = models.CharField(max_length=50)
-    email = models.EmailField()
-    start_date = models.DateField()
-    shift_schedule = models.CharField(max_length=255)
-    salary = models.DecimalField(max_digits=10, decimal_places=2)
-    skills = models.TextField(blank=True)
-    status = models.CharField(max_length=50)  # or use choices as with Task.status
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    is_owner = models.BooleanField(default=False)
 
     def __str__(self):
-        return self.name
+        return self.user.username
